@@ -7,8 +7,8 @@ app.use(express.json());
 app.use('/products', productRoutes);
 
 // Health check
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({ success: true, message: 'Server is running' });
+app.get('/', (req, res) => {
+    res.send('Api is Running');
 });
 
 const PORT = process.env.PORT || 3000;
