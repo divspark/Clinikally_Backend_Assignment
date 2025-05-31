@@ -7,7 +7,7 @@ app.use(express.json());
 app.use('/products', productRoutes);
 
 // Health check
-app.get('/health', (req: Request, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: 'Server is running' });
 });
 
