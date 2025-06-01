@@ -7,7 +7,7 @@ const searchProducts = async (
   query: string,
   limit: number,
   skip: number
-): Promise<Product[]> => {
+): Promise<{ products: Product[], totalCount: number }> => {
   const products = await loadProducts();
   const normalizedQuery = query.toLowerCase().trim();
 
@@ -36,8 +36,11 @@ const searchProducts = async (
       return a.title.localeCompare(b.title);
     });
 
-  // Pagination
-  return filteredProducts.slice(skip, skip + limit);
+  // Pagination and total count
+  return {
+    products: filteredProducts.slice(skip, skip + limit),
+    totalCount: filteredProducts.length
+  };
 };
 
 // Controller
@@ -69,11 +72,24 @@ export const searchProductsController = async (req: Request, res: Response): Pro
   }
 
   try {
-    const products = await searchProducts(q as string, limitNum, skipNum);
-    const response: ApiResponse<typeof products> = {
+    const { products, totalCount } = await searchProducts(q as string, limitNum, skipNum);
+    const page = Math.floor(skipNum / limitNum) + 1;
+    const hasMore = skipNum + products.length < totalCount;
+
+    const response: ApiResponse<{
+      products: Product[];
+      page: number;
+      limit: number;
+      hasMore: boolean;
+    }> = {
       success: true,
       message: 'Products retrieved successfully',
-      data: products,
+      data: {
+        products,
+        page,
+        limit: limitNum,
+        hasMore
+      }
     };
     res.status(200).json(response);
   } catch (error) {
